@@ -34,13 +34,8 @@ def calculate(plan: RetirementPlan) -> CalculationResponse:
     return CalculationResponse(worksheet=calculate_retirement_plan(plan))
 
 
-@app.get("/")
-def index() -> FileResponse:
-    index_file = FRONTEND_DIR / "index.html"
-    if not index_file.exists():
-        raise HTTPException(status_code=500, detail="Frontend index.html is missing")
-    return FileResponse(index_file)
-
-
-app.mount("/css", StaticFiles(directory=FRONTEND_DIR / "css"), name="css")
-app.mount("/js", StaticFiles(directory=FRONTEND_DIR / "js"), name="js")
+app.mount(
+    "/",
+    StaticFiles(directory=FRONTEND_DIR, html=True),
+    name="frontend",
+)
