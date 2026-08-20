@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="YellowSunny retirement planning calculator">
+  <title>Retirement Planner | YellowSunny</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <nav class="top-nav">
+      <a href="/" class="home-link">← YellowSunny</a>
+    </nav>
+
+    <header class="page-header">
+      <div>
+        <h1>Retirement Planner</h1>
+        <p class="subtitle">Model retirement income, expenses, distributions, savings, and portfolio assets.</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <details>
+        <summary>How it works</summary>
+        <div class="panel prose">
+          <p><strong>Inputs you provide</strong></p>
+          <ul>
+            <li><strong>Assumptions</strong> — scenario name, retirement age/year, tax filing status, asset growth, and inflation.</li>
+            <li><strong>Income / Expenses</strong> — annual base amounts with inclusive start/end years. Active amounts inflate from each row's start year.</li>
+            <li><strong>Distributions</strong> — annual amounts with inclusive start/end years. Distribution amounts are not inflation-adjusted.</li>
+            <li><strong>Cash Value Assets</strong> — Savings/Brokerage seeds the Savings balance; 401K/IRA/Other seed Portfolio Assets.</li>
+          </ul>
+          <p><strong>Calculation</strong></p>
+          <ul>
+            <li>Federal tax is estimated using the selected filing status, the 2026 standard deduction, and 2026 progressive federal income-tax brackets.</li>
+            <li>The simplified tax model treats entered income and distributions as ordinary taxable income; it does not model credits, capital gains, or special Social Security taxation.</li>
+            <li>Net Cash Flow = Income − Expenses + Distributions − Taxes.</li>
+            <li>Savings = prior Savings + Net Cash Flow.</li>
+            <li>Portfolio = (prior Portfolio − Distributions) × (1 + Asset Growth %).</li>
+            <li>The worksheet contains 49 annual rows.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <section class="card">
+      <details open>
+        <summary>Assumptions</summary>
+        <div class="panel">
+          <div class="controls">
+            <input type="file" id="jsonUpload" accept=".json,application/json" hidden>
+            <button type="button" class="btn" id="btnImportJSON">Import Scenario</button>
+            <button type="button" class="btn" id="btnExportJSON">Export Scenario</button>
+          </div>
+
+          <div class="input-group assumptions-group">
+            <div class="form-grid">
+            <label class="span-2">
+              <span class="label-with-info">Scenario Name <span class="info-tip" title="A name for this saved scenario. It is included in the exported JSON and export filename." aria-label="Scenario name help">i</span></span>
+              <input type="text" id="scenarioName" value="Default" maxlength="80">
+            </label>
+
+            <label>
+              <span class="label-with-info">Retirement Age <span class="info-tip" title="Age shown in the first worksheet row." aria-label="Retirement age help">i</span></span>
+              <input type="number" id="retAge" value="65" min="40" max="100">
+            </label>
+            <label>
+              <span class="label-with-info">Retirement Year <span class="info-tip" title="Calendar year shown in the first worksheet row." aria-label="Retirement year help">i</span></span>
+              <input type="number" id="retYear" value="2035" min="1900" max="2200">
+            </label>
+
+            <fieldset class="radio-fieldset span-2">
+              <legend class="label-with-info">Tax filing status in retirement <span class="info-tip" title="Select the filing status used for the fixed 2026 federal standard deduction and marginal tax brackets." aria-label="Tax filing status help">i</span></legend>
+              <div class="radio-group">
+                <label class="radio-option"><input type="radio" name="filingStatus" value="Single" checked> Single</label>
+                <label class="radio-option"><input type="radio" name="filingStatus" value="Married Filing Jointly"> Married Filing Jointly</label>
+                <label class="radio-option"><input type="radio" name="filingStatus" value="Married Filing Separately"> Married Filing Separately</label>
+                <label class="radio-option"><input type="radio" name="filingStatus" value="Head of Household"> Head of Household</label>
+              </div>
+            </fieldset>
+
+            <label>
+              <span class="label-with-info">Asset Growth % <span class="info-tip" title="Annual growth rate applied to Portfolio Assets after distributions are withdrawn." aria-label="Asset growth help">i</span></span>
+              <input type="number" id="growthPct" value="5" min="-50" max="100" step="0.1">
+            </label>
+            <label>
+              <span class="label-with-info">Inflation % <span class="info-tip" title="Annual inflation rate applied to active Income and Expense rows. Distributions are not inflated." aria-label="Inflation help">i</span></span>
+              <input type="number" id="inflationPct" value="3.5" min="-10" max="100" step="0.1">
+            </label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="section-heading">
+              <h2 class="heading-with-info">Income in Retirement <span class="info-tip" title="Annual retirement income. Active rows are increased by inflation from their Start Year." aria-label="Income section help">i</span></h2>
+          </div>
+          <div class="table-wrap input-table-wrap">
+            <table class="input-table">
+              <thead><tr>
+                <th>Income Name <span class="info-tip" title="Short description of the income source." aria-label="Income name help">i</span></th>
+                <th>Annual Amount <span class="info-tip" title="Base annual amount in the Start Year." aria-label="Income annual amount help">i</span></th>
+                <th>Start Year <span class="info-tip" title="First year this income is included." aria-label="Income start year help">i</span></th>
+                <th>End Year <span class="info-tip" title="Last year this income is included." aria-label="Income end year help">i</span></th>
+                <th>Actions <span class="info-tip" title="Minus removes the row; plus inserts a row below." aria-label="Income row actions help">i</span></th>
+              </tr></thead>
+              <tbody id="tblIncome"></tbody>
+            </table>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="section-heading">
+              <h2 class="heading-with-info">Expenses in Retirement <span class="info-tip" title="Annual retirement expenses. Active rows are increased by inflation from their Start Year." aria-label="Expenses section help">i</span></h2>
+          </div>
+          <div class="table-wrap input-table-wrap">
+            <table class="input-table">
+              <thead><tr>
+                <th>Expense Name <span class="info-tip" title="Short description of the expense." aria-label="Expense name help">i</span></th>
+                <th>Annual Amount <span class="info-tip" title="Base annual amount in the Start Year." aria-label="Expense annual amount help">i</span></th>
+                <th>Start Year <span class="info-tip" title="First year this expense is included." aria-label="Expense start year help">i</span></th>
+                <th>End Year <span class="info-tip" title="Last year this expense is included." aria-label="Expense end year help">i</span></th>
+                <th>Actions <span class="info-tip" title="Minus removes the row; plus inserts a row below." aria-label="Expense row actions help">i</span></th>
+              </tr></thead>
+              <tbody id="tblExpenses"></tbody>
+            </table>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="section-heading">
+              <h2 class="heading-with-info">Distributions in Retirement <span class="info-tip" title="Planned portfolio distributions. These amounts are not increased by inflation." aria-label="Distributions section help">i</span></h2>
+          </div>
+          <div class="table-wrap input-table-wrap">
+            <table class="input-table">
+              <thead><tr>
+                <th>Distribution Name <span class="info-tip" title="Short description of the planned distribution." aria-label="Distribution name help">i</span></th>
+                <th>Distribution Type <span class="info-tip" title="Classification for the withdrawal: Normal, Early 72t, Early 55+, or RMD. It is saved with the scenario; it does not currently change the tax formula." aria-label="Distribution type help">i</span></th>
+                <th>Annual Amount <span class="info-tip" title="Annual withdrawal amount. It stays constant and is not inflation-adjusted." aria-label="Distribution annual amount help">i</span></th>
+                <th>Start Year <span class="info-tip" title="First year this distribution is included." aria-label="Distribution start year help">i</span></th>
+                <th>End Year <span class="info-tip" title="Last year this distribution is included." aria-label="Distribution end year help">i</span></th>
+                <th>Actions <span class="info-tip" title="Minus removes the row; plus inserts a row below." aria-label="Distribution row actions help">i</span></th>
+              </tr></thead>
+              <tbody id="tblDistributions"></tbody>
+            </table>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="section-heading">
+              <h2 class="heading-with-info">Cash Value Assets at Retirement <span class="info-tip" title="Balances available at the start of retirement. Savings/Brokerage seeds the Savings column; all other asset types seed Portfolio Assets." aria-label="Assets section help">i</span></h2>
+          </div>
+          <div class="table-wrap input-table-wrap">
+            <table class="input-table">
+              <thead><tr>
+                <th>Asset Name <span class="info-tip" title="Short description of the account or asset." aria-label="Asset name help">i</span></th>
+                <th>Asset Type <span class="info-tip" title="401K, Savings/Brokerage, IRA, or Other." aria-label="Asset type help">i</span></th>
+                <th>Amount <span class="info-tip" title="Balance available at the beginning of the retirement year." aria-label="Asset amount help">i</span></th>
+                <th>Actions <span class="info-tip" title="Minus removes the row; plus inserts a row below." aria-label="Asset row actions help">i</span></th>
+              </tr></thead>
+              <tbody id="tblAssets"></tbody>
+            </table>
+            </div>
+          </div>
+
+          <div class="run-row">
+            <button type="button" class="btn primary" id="btnRun">Apply &amp; Calculate</button>
+            <span id="applyStatus" class="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="card">
+      <details open>
+        <summary>Worksheet</summary>
+        <div class="panel">
+          <h2 class="heading-with-info worksheet-heading">Projection Worksheet <span class="info-tip" title="49 annual rows showing modeled cash flow, taxes, savings, and portfolio assets." aria-label="Worksheet help">i</span></h2>
+          <div class="table-wrap worksheet-wrap">
+            <table class="worksheet-table">
+              <thead>
+                <tr>
+                  <th>Year</th><th>Age</th><th>Income</th><th>Expenses</th><th>Distributions</th><th>Taxes</th><th>Net Cash Flow</th><th>Savings</th><th>Cash Value Assets</th>
+                </tr>
+              </thead>
+              <tbody id="sheetBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <script src="js/app.js" defer></script>
+</body>
+</html>

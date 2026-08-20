@@ -1,0 +1,9 @@
+services:
+  retirement-planner:
+    build: .
+    container_name: retirement-planner
+    restart: unless-stopped
+    environment:
+      ROOT_PATH: /retirement-planner
+    ports:
+      - "127.0.0.1:8001:8000"

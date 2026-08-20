@@ -1,0 +1,6 @@
+# Add this inside your existing yellowsunny.com site block,
+# BEFORE the catch-all main-site handler/file_server.
+
+handle_path /retirement-planner/* {
+    reverse_proxy 127.0.0.1:8001
+}
