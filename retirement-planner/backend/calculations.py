@@ -152,7 +152,8 @@ def calculate_retirement_plan(plan: RetirementPlan) -> list[WorksheetRow]:
                 gross_taxable_income,
                 assumptions.filingStatus,
             )
-        net_cash_flow = income - expenses + distributions - taxes
+        net_income = income + distributions - taxes
+        net_cash_flow = net_income - expenses
 
         savings = previous_savings + net_cash_flow
         previous_savings = savings
@@ -165,9 +166,10 @@ def calculate_retirement_plan(plan: RetirementPlan) -> list[WorksheetRow]:
                 year=current_year,
                 age=current_age,
                 income=income,
-                expenses=expenses,
                 distributions=distributions,
                 taxes=taxes,
+                netIncome=net_income,
+                expenses=expenses,
                 netCashFlow=net_cash_flow,
                 savings=savings,
                 portfolioAssets=portfolio,

@@ -217,13 +217,33 @@ function getPlan() {
 }
 
 function worksheetObjectToArray(row) {
-  return [row.year, row.age, row.income, row.expenses, row.distributions, row.taxes, row.netCashFlow, row.savings, row.portfolioAssets];
+  const netIncome = Number(row.netIncome ?? (Number(row.income || 0) + Number(row.distributions || 0) - Number(row.taxes || 0)));
+  return [
+    row.year, row.age, row.income, row.distributions, row.taxes, netIncome,
+    row.expenses, row.netCashFlow, row.savings, row.portfolioAssets,
+  ];
 }
 
 function worksheetArrayToObject(row) {
+  // New format (10 columns): Year, Age, Income, Distributions, Taxes,
+  // Net Income, Expenses, Net Cash Flow, Savings, Cash Value Assets.
+  if (row.length >= 10) {
+    return {
+      year: Number(row[0]), age: Number(row[1]), income: Number(row[2]),
+      distributions: Number(row[3]), taxes: Number(row[4]), netIncome: Number(row[5]),
+      expenses: Number(row[6]), netCashFlow: Number(row[7]), savings: Number(row[8]),
+      portfolioAssets: Number(row[9]),
+    };
+  }
+
+  // Backward compatibility with older 9-column scenario exports.
+  const income = Number(row[2]);
+  const expenses = Number(row[3]);
+  const distributions = Number(row[4]);
+  const taxes = Number(row[5]);
   return {
-    year: Number(row[0]), age: Number(row[1]), income: Number(row[2]), expenses: Number(row[3]),
-    distributions: Number(row[4]), taxes: Number(row[5]), netCashFlow: Number(row[6]),
+    year: Number(row[0]), age: Number(row[1]), income, distributions, taxes,
+    netIncome: income + distributions - taxes, expenses, netCashFlow: Number(row[6]),
     savings: Number(row[7]), portfolioAssets: Number(row[8]),
   };
 }
@@ -234,9 +254,9 @@ function renderWorksheet(rows) {
   if (!rows.length) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 9;
+    td.colSpan = 10;
     td.className = "empty-row";
-    td.textContent = "Click Apply assumptions and Process Projections to generate the worksheet.";
+    td.textContent = "Click Apply Assumptions and Process Projections to generate the worksheet.";
     tr.appendChild(td);
     body.appendChild(tr);
     return;
@@ -248,8 +268,8 @@ function renderWorksheet(rows) {
       const td = document.createElement("td");
       const numeric = Number(value) || 0;
       td.textContent = index < 2 ? String(value) : currencyFormatter.format(numeric);
-      if (index === 6 && numeric < 0) td.classList.add("negative");
-      if ((index === 7 || index === 8) && numeric < 0) td.classList.add("negative-strong");
+      if (index === 7 && numeric < 0) td.classList.add("negative");
+      if ((index === 8 || index === 9) && numeric < 0) td.classList.add("negative-strong");
       tr.appendChild(td);
     });
     body.appendChild(tr);
@@ -358,13 +378,19 @@ function loadPlanObject(obj) {
   if (!assetRows.length) addAssetRow();
 
   if (Array.isArray(obj.worksheet) && obj.worksheet.length) {
-    lastWorksheet = obj.worksheet.map((row) => Array.isArray(row) ? worksheetArrayToObject(row) : row);
+    lastWorksheet = obj.worksheet.map((row) => {
+      if (Array.isArray(row)) return worksheetArrayToObject(row);
+      return {
+        ...row,
+        netIncome: Number(row.netIncome ?? (Number(row.income || 0) + Number(row.distributions || 0) - Number(row.taxes || 0))),
+      };
+    });
     renderWorksheet(lastWorksheet);
     setStatus("Imported scenario, including worksheet.");
   } else {
     lastWorksheet = [];
     renderWorksheet(lastWorksheet);
-    setStatus("Imported scenario. Click Apply assumptions and Process Projections to recompute.");
+    setStatus("Imported scenario. Click Apply Assumptions and Process Projections to recompute.");
   }
 }
 

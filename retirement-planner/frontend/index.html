@@ -36,8 +36,8 @@
             <li>Federal tax is estimated either with your selected flat tax rate or with the selected filing status, 2026 standard deduction, and 2026 progressive federal income-tax brackets.</li>
             <li>The simplified tax model treats entered income and distributions as ordinary taxable income. Flat-tax mode applies the entered rate directly to that combined amount; it does not apply the standard deduction or brackets.</li>
             <li>The model does not separately account for credits, capital gains rates, or special Social Security taxation.</li>
-            <li>Net Cash Flow = Income − Expenses + Distributions − Taxes.</li>
-            <li>Savings = prior Savings + Net Cash Flow.</li>
+            <li>Net Income = Income + Distributions − Taxes.</li>
+            <li>Net Cash Flow = Net Income − Expenses. Savings = prior Savings + Net Cash Flow.</li>
             <li>Portfolio = (prior Portfolio − Distributions) × (1 + Asset Growth %).</li>
             <li>The worksheet contains 49 annual rows.</li>
           </ul>
@@ -171,7 +171,7 @@
           </div>
 
           <div class="run-row">
-            <button type="button" class="btn primary" id="btnRun">Apply assumptions and Process Projections</button>
+            <button type="button" class="btn primary" id="btnRun">Apply Assumptions and Process Projections</button>
             <span id="applyStatus" class="status" aria-live="polite"></span>
           </div>
         </div>
@@ -186,7 +186,7 @@
             <table class="worksheet-table">
               <thead>
                 <tr>
-                  <th>Year</th><th>Age</th><th>Income</th><th>Expenses</th><th>Distributions</th><th>Taxes</th><th>Net Cash Flow</th><th>Savings</th><th>Cash Value Assets</th>
+                  <th>Year</th><th>Age</th><th>Income</th><th>Distributions</th><th>Taxes</th><th>Net Income</th><th>Expenses</th><th>Net Cash Flow</th><th>Savings</th><th>Cash Value Assets</th>
                 </tr>
               </thead>
               <tbody id="sheetBody"></tbody>

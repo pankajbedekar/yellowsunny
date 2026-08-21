@@ -57,3 +57,5 @@ sudo systemctl reload caddy
 ## YellowSunny visual theme
 
 The planner uses the same warm ivory / mustard-yellow visual palette as the main YellowSunny landing page. `frontend/assets/Yellowsunny.png` is rendered as a very faint fixed background watermark. The backend serves the complete `frontend` directory through one `StaticFiles` mount so CSS, JavaScript, and image assets work under the Caddy `/retirement-planner/` route.
+
+- Projection worksheet now includes Net Income = Income + Distributions - Taxes, with Expenses shown after Net Income.

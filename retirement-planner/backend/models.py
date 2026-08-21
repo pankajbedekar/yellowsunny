@@ -73,9 +73,10 @@ class WorksheetRow(BaseModel):
     year: int
     age: int
     income: float
-    expenses: float
     distributions: float
     taxes: float
+    netIncome: float
+    expenses: float
     netCashFlow: float
     savings: float
     portfolioAssets: float
