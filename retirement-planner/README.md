@@ -13,9 +13,9 @@ Vanilla HTML/CSS/JavaScript frontend with a FastAPI/Python calculation backend, 
 - Distribution types: Normal, Early 72t, Early 55+, RMD.
 - Asset types: 401K, Savings/Brokerage, IRA, Other.
 - Asset growth defaults to 5%; inflation defaults to 3.5%.
-- Tax estimate uses the selected filing status with fixed **2026 federal standard deductions and progressive ordinary-income brackets**.
+- Tax estimate can use either a user-entered **flat tax rate** or the selected filing status with fixed **2026 federal standard deductions and progressive ordinary-income brackets**.
 - The 2026 tax tables are centralized in `backend/calculations.py` for easy future updates.
-- The simplified tax model treats all entered income and distributions as ordinary taxable income. It does not model credits, capital gains, special Social Security taxation, state taxes, or distribution penalties.
+- The simplified tax model treats all entered income and distributions as ordinary taxable income. Flat-tax mode applies the entered percentage directly to Income + Distributions and does not use the standard deduction or brackets. The model does not separately account for credits, capital gains, special Social Security taxation, state taxes, or distribution penalties.
 - Distribution Type is currently saved/classified but does not change the calculation.
 - The application is stateless; it does not persist scenarios to a database.
 

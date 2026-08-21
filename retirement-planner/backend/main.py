@@ -15,7 +15,7 @@ FRONTEND_DIR = BASE_DIR / "frontend"
 
 app = FastAPI(
     title="YellowSunny Retirement Planner",
-    version="1.2.1",
+    version="1.3.0",
     root_path=os.getenv("ROOT_PATH", ""),
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",

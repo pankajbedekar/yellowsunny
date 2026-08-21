@@ -115,8 +115,8 @@ def calculate_retirement_plan(plan: RetirementPlan) -> list[WorksheetRow]:
     Current assumptions:
     - Income and expenses inflate from each row's start year.
     - Distributions stay at the entered annual amount; inflation is not applied.
-    - Federal tax uses the fixed 2026 standard deduction and progressive tax
-      brackets for the selected filing status.
+    - Federal tax uses either the user-entered flat tax rate or the fixed 2026
+      standard deduction and progressive tax brackets for the selected filing status.
     - All entered income and distributions are treated as ordinary taxable income.
     - Distribution Type is retained for scenario classification and future rules;
       it does not currently alter the tax or withdrawal calculation.
@@ -144,10 +144,14 @@ def calculate_retirement_plan(plan: RetirementPlan) -> list[WorksheetRow]:
         expenses = _inflated_total(plan.expenses, current_year, inflation_rate)
         distributions = _flat_total(plan.distributions, current_year)
 
-        taxes = _federal_income_tax_2026(
-            income + distributions,
-            assumptions.filingStatus,
-        )
+        gross_taxable_income = income + distributions
+        if assumptions.filingStatus == "Use flat tax rate":
+            taxes = gross_taxable_income * (assumptions.flatTaxPercent / 100.0)
+        else:
+            taxes = _federal_income_tax_2026(
+                gross_taxable_income,
+                assumptions.filingStatus,
+            )
         net_cash_flow = income - expenses + distributions - taxes
 
         savings = previous_savings + net_cash_flow

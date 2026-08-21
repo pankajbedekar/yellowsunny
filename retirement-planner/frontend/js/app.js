@@ -193,6 +193,11 @@ function setFilingStatus(value) {
   (radio ?? document.querySelector('input[name="filingStatus"][value="Single"]')).checked = true;
 }
 
+function updateFlatTaxVisibility() {
+  const useFlatTax = selectedFilingStatus() === "Use flat tax rate";
+  document.getElementById("flatTaxRateWrap").classList.toggle("hidden", !useFlatTax);
+}
+
 function getPlan() {
   return {
     assumptions: {
@@ -200,6 +205,7 @@ function getPlan() {
       retirementAge: Number(document.getElementById("retAge").value),
       retirementYear: Number(document.getElementById("retYear").value),
       filingStatus: selectedFilingStatus(),
+      flatTaxPercent: Number(document.getElementById("flatTaxPct").value),
       assetGrowthPercent: Number(document.getElementById("growthPct").value),
       inflationPercent: Number(document.getElementById("inflationPct").value),
     },
@@ -230,7 +236,7 @@ function renderWorksheet(rows) {
     const td = document.createElement("td");
     td.colSpan = 9;
     td.className = "empty-row";
-    td.textContent = "Click Apply & Calculate to generate the worksheet.";
+    td.textContent = "Click Apply assumptions and Process Projections to generate the worksheet.";
     tr.appendChild(td);
     body.appendChild(tr);
     return;
@@ -330,6 +336,8 @@ function loadPlanObject(obj) {
   document.getElementById("retAge").value = assumptions.retirementAge ?? 65;
   document.getElementById("retYear").value = assumptions.retirementYear ?? 2035;
   setFilingStatus(assumptions.filingStatus ?? "Single");
+  document.getElementById("flatTaxPct").value = assumptions.flatTaxPercent ?? 20;
+  updateFlatTaxVisibility();
   document.getElementById("growthPct").value = assumptions.assetGrowthPercent ?? 5;
   document.getElementById("inflationPct").value = assumptions.inflationPercent ?? 3.5;
 
@@ -356,7 +364,7 @@ function loadPlanObject(obj) {
   } else {
     lastWorksheet = [];
     renderWorksheet(lastWorksheet);
-    setStatus("Imported scenario. Click Apply & Calculate to recompute.");
+    setStatus("Imported scenario. Click Apply assumptions and Process Projections to recompute.");
   }
 }
 
@@ -370,6 +378,9 @@ function seedDefaults() {
 
 function wireEvents() {
   document.getElementById("btnRun").addEventListener("click", calculate);
+  document.querySelectorAll('input[name="filingStatus"]').forEach((radio) => {
+    radio.addEventListener("change", updateFlatTaxVisibility);
+  });
   document.getElementById("btnExportJSON").addEventListener("click", exportJson);
   const uploadInput = document.getElementById("jsonUpload");
   document.getElementById("btnImportJSON").addEventListener("click", () => uploadInput.click());
@@ -384,4 +395,5 @@ function wireEvents() {
 
 seedDefaults();
 wireEvents();
+updateFlatTaxVisibility();
 renderWorksheet([]);

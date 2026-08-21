@@ -12,6 +12,7 @@ FilingStatus = Literal[
     "Married Filing Jointly",
     "Married Filing Separately",
     "Head of Household",
+    "Use flat tax rate",
 ]
 
 
@@ -20,6 +21,7 @@ class Assumptions(BaseModel):
     retirementAge: int = Field(default=65, ge=40, le=100)
     retirementYear: int = Field(default=2035, ge=1900, le=2200)
     filingStatus: FilingStatus = "Single"
+    flatTaxPercent: float = Field(default=20.0, ge=0, le=100)
     assetGrowthPercent: float = Field(default=5.0, ge=-50, le=100)
     inflationPercent: float = Field(default=3.5, ge=-10, le=100)
 
